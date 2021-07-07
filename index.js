@@ -8,34 +8,21 @@ const availableFormats = ['64x64', '32x32', '16x16', '128x128'];
 const avaibableNames = ['symbol', 'slug', 'rank'];
 
 let chosenFormat = availableFormats[0];
-let chosenName = avaibableNames[1];
+let chosenName = avaibableNames[0];
 
 let cryptocurrencyDownloadUrls = [];
 let CMCresult = '';
 
-if (process.argv.includes(availableFormats[0])) {
-  chosenFormat = availableFormats[0];
+for (const format of availableFormats) {
+  if (process.argv.includes(format)) {
+    chosenFormat = format;
+  }
 }
-if (process.argv.includes(availableFormats[1])) {
-  chosenFormat = availableFormats[1];
-}
-if (process.argv.includes(availableFormats[2])) {
-  chosenFormat = availableFormats[2];
-}
-if (process.argv.includes(availableFormats[3])) {
-  chosenFormat = availableFormats[3];
-}
-if (process.argv.includes(avaibableNames[0])) {
-  chosenName = avaibableNames[0];
-}
-if (process.argv.includes(avaibableNames[1])) {
-  chosenName = avaibableNames[1];
-}
-if (process.argv.includes(avaibableNames[2])) {
-  chosenName = avaibableNames[2];
-}
-if (process.argv.includes(avaibableNames[3])) {
-  chosenName = avaibableNames[3];
+
+for (const name of avaibableNames) {
+  if (process.argv.includes(name)) {
+    chosenName = name;
+  }
 }
 
 iconDestination = `${iconDestination}${chosenName}/${chosenFormat}`;
@@ -56,14 +43,14 @@ https
     });
     response.on('end', () => {
       CMCresult = JSON.parse(CMCresult);
-      CMCresult = CMCresult.data.cryptoCurrencyList;
       // console.log(CMCresult);
-
+      CMCresult = CMCresult.data.cryptoCurrencyList;
       for (let i = 0; i < CMCresult.length; i++) {
         cryptocurrencyDownloadUrls.push(
           `https://s2.coinmarketcap.com/static/img/coins/${chosenFormat}/${CMCresult[i].id}.png`
         );
       }
+      // extract out, check file before write a new png???
       (async function loop() {
         console.log('Started saving icons...');
         for (let i = 0; i < cryptocurrencyDownloadUrls.length; i++) {
@@ -77,7 +64,7 @@ https
                   err.status = response.statusCode;
                   return reject(err);
                 }
-                let chunks = [];
+                let chunks = '';
                 response.setEncoding('binary');
                 response
                   .on('data', (chunk) => {
@@ -85,19 +72,19 @@ https
                   })
                   .on('end', () => {
                     let stream;
-                    if (chosenName === avaibableNames[0]) {
+                    if (chosenName === avaibableNames[2]) {
                       stream = fs.createWriteStream(
-                        `${iconDestination}${i + 1}.png`
+                        `${iconDestination}/${i + 1}.png`
                       );
                     } else {
                       stream = fs.createWriteStream(
-                        `${iconDestination}${CMCresult[i][chosenName]}.png`
+                        `${iconDestination}/${CMCresult[i][chosenName]}.png`
                       );
                     }
                     stream.write(chunks, 'binary');
                     stream.on('finish', () => {
                       resolve(
-                        `${iconDestination}${CMCresult[i].slug}.png saved succesfully :)`
+                        `${iconDestination}/${CMCresult[i].slug}.png saved succesfully :)`
                       );
                       console.log(
                         `Saved ${CMCresult[i][chosenName]}.png in ${iconDestination}`
